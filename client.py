@@ -6,6 +6,9 @@ from threading import Thread
 # ---ПУГАМЕ НАЛАШТУВАННЯ ---
 WIDTH, HEIGHT = 800, 600
 init()
+BACKGROUND_COLOR = (16, 11, 27)
+LEFT_PADDLE_COLOR = (255, 0, 255)
+RIGHT_PADDLE_COLOR = (30, 144, 255)
 screen = display.set_mode((WIDTH, HEIGHT))
 clock = time.Clock()
 display.set_caption("Пінг-Понг")
@@ -88,9 +91,9 @@ while True:
         continue  # Блокує гру після перемоги
 
     if game_state:
-        screen.fill((30, 30, 30))
-        draw.rect(screen, (0, 255, 0), (20, game_state['paddles']['0'], 20, 100))
-        draw.rect(screen, (255, 0, 255), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
+        screen.fill((BACKGROUND_COLOR))
+        draw.rect(screen, (LEFT_PADDLE_COLOR), (20, game_state['paddles']['0'], 20, 100))
+        draw.rect(screen, (RIGHT_PADDLE_COLOR), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
         draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
         score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
         screen.blit(score_text, (WIDTH // 2 -25, 20))
