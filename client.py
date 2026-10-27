@@ -3,6 +3,8 @@ import socket
 import json
 from threading import Thread
 
+from pygame.surface import Surface
+
 # ---ПУГАМЕ НАЛАШТУВАННЯ ---
 WIDTH, HEIGHT = 800, 600
 init()
@@ -44,9 +46,25 @@ def receive():
 font_win = font.Font(None, 72)
 font_main = font.Font(None, 36)
 # --- ЗОБРАЖЕННЯ ----
+Background_img = image.load("images/background.jpg") 
+background_img: Surface = transform.scale(Background_img, (WIDTH, HEIGHT))
 
+ball_img = image.load("images/ball.png")
+ball_img: Surface = transform.scale(ball_img, (20, 20))
 # --- ЗВУКИ ---
+mixer.init()
 
+mixer.music.load("sounds/background_music.mp3")
+mixer.music.set_volume(0.1)
+mixer.music.play(-1)  
+
+wall_sound = mixer.Sound("sounds/wall.ogg") 
+platform_sound = mixer.Sound("sounds/platform.ogg")
+
+wall_sound.set_volume(0.5)
+
+platform_sound.set_volume(0.5)
+last_sound_event = None 
 # --- ГРА ---
 game_over = False
 winner = None
@@ -91,24 +109,28 @@ while True:
         continue  # Блокує гру після перемоги
 
     if game_state:
-        screen.fill((BACKGROUND_COLOR))
+        screen.blit(background_img, (0, 0))
         draw.rect(screen, (LEFT_PADDLE_COLOR), (20, game_state['paddles']['0'], 20, 100))
         draw.rect(screen, (RIGHT_PADDLE_COLOR), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
-        draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
+        screen.blit(ball_img, (game_state['ball']['x'] - ball_img.get_width() // 2, game_state['ball']['y'] - ball_img.get_height() // 2))
         score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
         screen.blit(score_text, (WIDTH // 2 -25, 20))
-
+        
         if game_state['sound_event']:
-            if game_state['sound_event'] == 'wall_hit':
-                # звук відбиття м'ячика від стін
-                pass
-            if game_state['sound_event'] == 'platform_hit':
-                # звук відбиття м'ячика від платформи
-                pass
+            if game_state['sound_event'] == last_sound_event:
+                if game_state['sound_event'] == "wall":
+                    wall_sound.play()
+                elif game_state['sound_event'] == "platform":
+                    platform_sound.play()
+                
+                last_sound_event = game_state['sound_event']
+        
+        else:
+            last_sound_event = None
 
     else:
-        wating_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
-        screen.blit(wating_text, (WIDTH // 2 - 25, 20))
+        waiting_text = font_main.render(f"Очікування гравців...", True, (255, 255, 255))
+        screen.blit(waiting_text, (WIDTH // 2 - 25, 20))
 
     display.update()
     clock.tick(60)
